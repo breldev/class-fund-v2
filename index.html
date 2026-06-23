@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Fund Auditor</title>
+  <link rel="stylesheet" href="style copy.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">Class Fund Auditor</div>
+
+      <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="showPage('students')">Students</button>
+      <button class="nav-btn" onclick="showPage('payments')">Payments</button>
+      <button class="nav-btn" onclick="showPage('expenses')">Expenses</button>
+      <button class="nav-btn" onclick="showPage('reports')">Reports</button>
+      <button class="nav-btn" onclick="showPage('calendar')">Calendar</button>
+      <button class="nav-btn" onclick="showPage('archive')">Archive</button>
+      <button class="nav-btn" onclick="showPage('analytics')">Analytics</button>
+      <button class="nav-btn" onclick="showPage('history')">History</button>
+    </aside>
+
+    <main class="main">
+      <section id="page-dashboard" class="page active ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Dashboard Overview</h1>
+          <p>Dito lahat makikita, mga totals and hatian, etc.</p>
+        </div>
+
+        <div class="hero-card">
+          <h2>Total Fund Progress</h2>
+          <p class="hero-subtitle">Monitor your class fund performance in real time.</p>
+
+          <div class="hero-value">
+            <span id="collected">PHP 0</span> / <span id="expected">PHP 0</span>
+          </div>
+
+          <div class="progress-bar">
+            <div id="progressFill"></div>
+          </div>
+
+          <div class="hero-stats">
+            <div class="mini-stat">
+              <h4>Weekly Fee</h4>
+              <span>PHP 5</span>
+            </div>
+            <div class="mini-stat">
+              <h4>Project Fund</h4>
+              <span>70%</span>
+            </div>
+            <div class="mini-stat">
+              <h4>Reserve Fund</h4>
+              <span>30%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-section">
+          <div class="kpi-group">
+            <h3>Finance</h3>
+            <div class="dashboard">
+              <div class="card">Remaining<span id="remaining">PHP 0</span></div>
+              <div class="card">Project Fund<span id="eventFund">PHP 0</span></div>
+              <div class="card">Reserve Fund<span id="reserveFund">PHP 0</span></div>
+              <div class="card expense-kpi">Expenses<span id="expenseTotal">PHP 0</span></div>
+              <div class="card balance-kpi">Net Balance<span id="netBalance">PHP 0</span></div>
+            </div>
+          </div>
+
+          <div class="kpi-group">
+            <h3>Status</h3>
+            <div class="dashboard">
+              <div class="card">Students<span id="studentCount">0</span></div>
+              <div class="card">Updated<span id="updatedCount">0</span></div>
+              <div class="card">Advanced<span id="advancedCount">0</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-students" class="page ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Students</h1>
+          <p>Dito po ang management ng student and payment records!</p>
+        </div>
+
+        <div class="card">
+          <input id="studentSearch" placeholder="Search student..." oninput="render()">
+        </div>
+
+        <div class="card">
+          <input id="studentName" placeholder="Enter name">
+          <button onclick="addStudent()">Add Student</button>
+        </div>
+
+
+        <div class="card import-card">
+          <div class="import-copy">
+            <h3>Import from Picture</h3>
+            <p>Upload a clear photo or screenshot, review the detected names, then import only when it looks right. - Pang import lang to ng student list heh</p>
+          </div>
+          <label class="file-picker" for="studentImageImport">Choose Image</label>
+          <input id="studentImageImport" type="file" accept="image/*" onchange="importStudentsFromImage(event)">
+          <div id="importStatus" class="import-status">Ready to scan a student list.</div>
+          <div id="importPreviewBox" class="import-preview-box">
+            <textarea id="importPreview" rows="8" placeholder="Scanned names will appear here, one per line. You can edit before importing."></textarea>
+            <div class="import-actions">
+              <button onclick="confirmStudentImport()">Import Reviewed Names</button>
+              <button class="ghost-btn" onclick="clearStudentImportPreview()">Clear Preview</button>
+              <button class="ghost-btn" onclick="undoLastStudentImport()">Undo Last Import</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Paid</th>
+                <th>Weeks</th>
+                <th>Debt</th>
+                <th>Status</th>
+                <th>History</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="page-payments" class="page ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Payments</h1>
+          <p>Dito po yung individual or manual add ng payments :> </p>
+        </div>
+
+        <div class="card">
+          <input id="paymentStudentSearch" placeholder="Search student..." oninput="renderSelect()">
+          <select id="studentSelect"></select>
+          <input id="paymentAmount" type="number" placeholder="Amount">
+          <button onclick="addPayment()">Add Payment</button>
+        </div>
+
+        <div class="card">
+          <h2 style="margin:0 0 10px; font-size:18px;">Selected Student Payments</h2>
+          <div id="paymentTable" aria-live="polite"></div>
+        </div>
+      </section>
+
+
+      <section id="page-expenses" class="page ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Class Expenses</h1>
+          <p>Track money spent from the class fund, like supplies, printing, projects, and event needs.</p>
+        </div>
+
+        <div class="dashboard">
+          <div class="card">Total Expenses<span id="expensesPageTotal">PHP 0</span></div>
+          <div class="card">Available Balance<span id="expensesPageBalance">PHP 0</span></div>
+        </div>
+
+        <div class="card expense-form">
+          <input id="expenseTitle" placeholder="Expense description">
+          <input id="expenseAmount" type="number" placeholder="Amount">
+          <input id="expenseDate" type="date">
+          <label class="file-picker receipt-picker" for="expenseReceipt">Receipt Image</label>
+          <input id="expenseReceipt" type="file" accept="image/*">
+          <button onclick="addExpense()">Add Expense</button>
+        </div>
+
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Receipt</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="expenseTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="page-calendar" class="page ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Collection Calendar</h1>
+          <p>Manage collection weeks and monthly schedule.</p>
+        </div>
+
+        <div class="card">
+          <h3>Collection Settings</h3>
+          <label for="startDate">First Collection Date</label>
+          <input type="date" id="startDate" onchange="saveSettings()">
+        </div>
+
+        <div class="card">
+          <h3>Current Collection Weeks</h3>
+          <div id="calendarWeeks">Loading schedule...</div>
+        </div>
+      </section>
+
+      <section id="page-archive" class="page ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Monthly Archive</h1>
+          <p>Dito naman po makikita yung monthly collections natin </p>
+        </div>
+
+        <div id="archiveContainer"></div>
+      </section>
+
+      <section id="page-analytics" class="page ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Monthly Analytics</h1>
+        </div>
+
+        <div class="dashboard">
+          <div class="card">Best Month<span id="bestMonth">-</span></div>
+          <div class="card">Highest Collection<span id="highestCollection">PHP 0</span></div>
+          <div class="card">Average Collection<span id="averageCollection">PHP 0</span></div>
+        </div>
+      </section>
+
+      <section id="page-history" class="page ui-animate">
+        <div class="page-header ui-animate">
+          <h1>Payment History</h1>
+          <p>View all payment records.- gagana lang po ito next month pag may previous data na tayo heh</p>
+        </div>
+
+
+        <div id="historyContainer"></div>
+      </section>
+
+      <section id="page-reports" class="page ui-animate">
+
+        <div class="page-header">
+          <h1>Reports</h1>
+          <p>Generate reports and export finance data.</p>
+        </div>
+
+        <div class="card">
+          <div class="report-actions">
+            <div class="report-copy-group">
+              <button onclick="copyReport()">Copy Report</button>
+              <button onclick="copyShortReport()">Copy Short Report</button>
+              <button onclick="copyGCReminder()">Copy GC Reminder</button>
+            </div>
+
+            <div class="report-export-group">
+              <button onclick="exportBackup()">Export Backup</button>
+              <button onclick="exportExcelBackupSafe()">Export Excel Backup</button>
+            </div>
+
+            <div class="report-import-group">
+              <label class="file-picker backup-picker" for="backupImport">Import Backup</label>
+              <input id="backupImport" type="file" accept=".json,application/json" onchange="importBackup(event)">
+            </div>
+          </div>
+
+          <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+  <div id="studentModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">x</span>
+      <div id="studentInfo"></div>
+    </div>
+  </div>
+
+  <div id="receiptModal" class="modal">
+    <div class="modal-content receipt-modal-content">
+      <span class="close" onclick="closeReceiptModal()">x</span>
+      <img id="receiptPreviewImage" class="receipt-preview-image" alt="Receipt preview">
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/data-provider-localstorage.js"></script>
+  <script src="js/xlsx-export.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
+
+
